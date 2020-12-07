@@ -1,0 +1,17 @@
+project/project
+project/target
+target
+tmp
+out
+.history
+dist
+/.idea
+/*.iml
+/.idea_modules
+/.classpath
+/.project
+/.settings
+/local-filestore/
+/test/output
+node_modules
+
