@@ -7,6 +7,7 @@ import scala.io.BufferedSource
 class TobogganSlopeProblem extends SharedValues {
 
   lazy val SOURCE_CONFIG_KEY = "thirdday.source.path"
+  lazy val listOfOpsFromPart2 = Seq((1,-1), (3,-1), (5,-1), (7,-1), (1,-2))
 
   /** Assuming a downward trajectory to the right */
   @tailrec
@@ -15,7 +16,7 @@ class TobogganSlopeProblem extends SharedValues {
     if ( currentYCoordiante < 0 ) {
       listOfPreviousSteps
     } else {
-      calculateSteps(currentPosition.copy(currentXCoordinate + changeToX, currentYCoordiante + changeToY), listOfPreviousSteps :+ currentPosition)
+      calculateSteps(currentPosition.copy(currentXCoordinate + changeToX, currentYCoordiante + changeToY), listOfPreviousSteps :+ currentPosition, changeToX = changeToX, changeToY = changeToY)
     }
   }
 
@@ -25,21 +26,37 @@ class TobogganSlopeProblem extends SharedValues {
     currentXCoordinate - (((currentXCoordinate / indexResetsToZeroAtIndex) * indexResetsToZeroAtIndex))
   }
 
-  def howManyObstaclesWillIHit(reader: BufferedSource = defaultReader, charsWhichAreObstacles: Seq[Char] = Seq('#'), startingCoordinates: (Int, Int) = (0, 10), maxCoordinates: (Int, Int) = (10, 10)): Int = {
-    val steps = calculateSteps(startingCoordinates)
+  def howManyObstaclesGivenManySteps(readerPath: String = DEFAULT_FILE_PATH, charsWhichAreObstacles: Seq[Char] = Seq('#'),
+                               startingCoordinates: (Int, Int) = (0, 10), maxCoordinates: (Int, Int) = (10, 10), listOfOperations: Seq[(Int, Int)] = listOfOpsFromPart2): Seq[Int] = {
+    listOfOperations.map {
+      case (changeToX, changeToY) =>
+        val steps = calculateSteps(startingCoordinates, changeToX = changeToX, changeToY = changeToY)
+        howManyObstaclesWillIHit(readerPath, charsWhichAreObstacles, startingCoordinates, maxCoordinates, steps)
+    }
+
+  }
+
+  def howManyObstaclesWillIHit(readerPath: String = DEFAULT_FILE_PATH, charsWhichAreObstacles: Seq[Char] = Seq('#'),
+                               startingCoordinates: (Int, Int) = (0, 10), maxCoordinates: (Int, Int) = (10, 10), steps: Seq[(Int, Int)]): Int = {
+    val reader = getReader(readerPath)
     val (_, startingYCoordinate) = startingCoordinates
     val (maxXCoordinate, maxYCoordinate) = maxCoordinates
-    reader.getLines.zipWithIndex.count {
+    val countOfObstacles = reader.getLines.zipWithIndex.count {
       case (lineOfVision, index) if maxYCoordinate - index <= startingYCoordinate =>
         val currentYCoordinate = maxYCoordinate - index
-        val grabCharAtIndex = steps.find {
+        val maybeGrabCharAtIndex = steps.find {
           case (_, y) => y == currentYCoordinate
         }.map {
           case (x, _) => correctXCoordinate(x, maxXCoordinate)
         }
-        val char = lineOfVision.lift(grabCharAtIndex.get).get
-        charsWhichAreObstacles.contains(char)
+        maybeGrabCharAtIndex.exists {
+          grabCharAtIndex =>
+            val char = lineOfVision.lift(grabCharAtIndex).get
+            charsWhichAreObstacles.contains(char)
+        }
       case (_, _ ) => false
     }
+    reader.close()
+    countOfObstacles
   }
 }
