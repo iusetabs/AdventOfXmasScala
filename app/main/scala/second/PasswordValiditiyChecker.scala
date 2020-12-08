@@ -4,17 +4,38 @@ import helpers.CommonHelper
 import scala.io.Source
 
 /** To return how many passwords are valid */
-object PasswordValidityChecker extends App {
+class PasswordValidityChecker extends App {
 
-  val DAY_2_SOURCE_CONFIG_KEY: String = "secondday.source.path"
+  lazy val DAY_2_SOURCE_CONFIG_KEY: String = "secondday.source.path"
+  lazy val DEFAULT_FILE_PATH: String = CommonHelper.getStringFromConf(DAY_2_SOURCE_CONFIG_KEY)
 
-  def getValuesFromInput(targetNumber: Long, inputFilePath: String = DAY_2_SOURCE_CONFIG_KEY): List[Long] = {
-    val inputFile = CommonHelper.getStringFromConf(inputFilePath)
-    val reader = Source.fromFile(inputFile)
-    val values = reader.getLines.flatMap(_.toLongOption).filter(_ < targetNumber).toList
-    // EXAMPLE: 8-11 l: qllllqllklhlvtl
+  /** Parse a line according to example input: 8-11 l: qllllqllklhlvtl
+   *  Returns a tuple with the first element being the password and the second the criteria */
+  def parseLine(line: String): (String, PasswordCriteria) = {
+    val maybePassword = line.split(" ").lastOption
+    val maybeRange = line.split(" ").headOption
+    val maybeChar = line.split(" ").lift(1).flatMap(_.headOption)
+    val maybeMinimum = maybeRange.flatMap(range => range.split("-").headOption.flatMap(_.toIntOption))
+    val maybeMaximum = maybeRange.flatMap(range => range.split("-").lastOption.flatMap(_.toIntOption))
+
+    if (maybePassword.isEmpty || maybeRange.isEmpty || maybeChar.isEmpty || maybeMinimum.isEmpty || maybeMaximum.isEmpty) {
+      throw new Exception(s"Invalid input detected, line=$line, maybePassword=$maybePassword, maybeChar=$maybeChar, maybeRange=$maybeRange")
+    } else {
+      val criteria = PasswordCriteria(maybeMinimum.get, maybeMaximum.get, maybeChar.get)
+      val password = maybePassword.get
+      (password, criteria)
+    }
+  }
+
+  def howManyValidPasswordsFromFile(filePath: String = DEFAULT_FILE_PATH): Int = {
+    val reader = Source.fromFile(filePath)
+    val countOfValidPasswords = reader.getLines.count {
+      line =>
+          val (password, criteria) = parseLine(line)
+          isPasswordValid(password, criteria)
+    }
     reader.close()
-    values
+    countOfValidPasswords
   }
 
   /** Check password validity */
