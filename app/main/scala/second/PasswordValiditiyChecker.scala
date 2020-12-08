@@ -32,24 +32,44 @@ class PasswordValidityChecker extends App {
     val countOfValidPasswords = reader.getLines.count {
       line =>
           val (password, criteria) = parseLine(line)
-          isPasswordValid(password, criteria)
+          isPasswordValidPart1(password, criteria)
     }
     reader.close()
     countOfValidPasswords
   }
 
-  /** Check password validity */
-  def isPasswordValid(password: String, criteria: PasswordCriteria): Boolean = {
+  /** Check password validity PART1 */
+  def isPasswordValidPart1(password: String, criteria: PasswordCriteria): Boolean = {
     val requiredCharacterCount = password.filter(_ == criteria.requiredCharacter).length
     requiredCharacterCount >= criteria.minimumCharacterCount && requiredCharacterCount <= criteria.maximumCharacterCount
   }
 
-  def isPasswordInvalid(password: String, criteria: PasswordCriteria): Boolean = {
-    !isPasswordValid(password, criteria)
+  /** Check password validity PART2 */
+  def isPasswordValidPart2(password: String, criteria: PasswordCriteria): Boolean = {
+    val isCharARequiredChar = password.lift(criteria.firstIndex).contains(criteria.requiredCharacter)
+    val isCharBRequiredChar = password.lift(criteria.secondIndex).contains(criteria.requiredCharacter)
+    isCharARequiredChar && !isCharBRequiredChar || !isCharARequiredChar && isCharBRequiredChar
+
+  }
+
+  /** For code readability, a negation of the valid implementation */
+  def isPasswordInvalidPart1(password: String, criteria: PasswordCriteria): Boolean = {
+    !isPasswordValidPart1(password, criteria)
+  }
+
+  /** For code readability, a negation of the valid implementation */
+  def isPasswordInvalidPart2(password: String, criteria: PasswordCriteria): Boolean = {
+    !isPasswordValidPart2(password, criteria)
   }
 
 }
 
 /** @param minimumCharacterCount: The minimum number of times a required character needs to appear in a password
  *  @param maximumCharacterCount: The maximum number of times a required character needs to appear in a password */
-case class PasswordCriteria(minimumCharacterCount: Int, maximumCharacterCount: Int, requiredCharacter: Char)
+case class PasswordCriteria(minimumCharacterCount: Int, maximumCharacterCount: Int, requiredCharacter: Char) {
+  /** For PART2, without impacting PART1 implementation, denotes the first index to inspect */
+  def firstIndex = minimumCharacterCount - 1
+
+  /** For PART2, without impacting PART1 implementation, denotes the second index to inspect */
+  def secondIndex = maximumCharacterCount - 1
+}
