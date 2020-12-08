@@ -1,13 +1,12 @@
 package second
 
-import helpers.CommonHelper
+import RichClasses.SharedValues
 import scala.io.Source
 
 /** To return how many passwords are valid */
-class PasswordValidityChecker extends App {
+class PasswordValidityChecker extends SharedValues {
 
-  lazy val DAY_2_SOURCE_CONFIG_KEY: String = "secondday.source.path"
-  lazy val DEFAULT_FILE_PATH: String = CommonHelper.getStringFromConf(DAY_2_SOURCE_CONFIG_KEY)
+  lazy val SOURCE_CONFIG_KEY: String = "secondday.source.path"
 
   /** Parse a line according to example input: 8-11 l: qllllqllklhlvtl
    *  Returns a tuple with the first element being the password and the second the criteria */
@@ -27,16 +26,15 @@ class PasswordValidityChecker extends App {
     }
   }
 
-  def howManyValidPasswordsFromFile(filePath: String = DEFAULT_FILE_PATH, isForPart1: Boolean = true): Int = {
-    val reader = Source.fromFile(filePath)
-    val countOfValidPasswords = reader.getLines.count {
+  def howManyValidPasswordsFromFile(isForPart1: Boolean = true): Int = {
+    val countOfValidPasswords = defaultReader.getLines.count {
       line =>
           val (password, criteria) = parseLine(line)
           val part1CriteriaMet = isPasswordValidPart1(password, criteria)
           val part2CriteriaMet = isPasswordValidPart2(password, criteria)
           isForPart1 && part1CriteriaMet || !isForPart1 && part2CriteriaMet
     }
-    reader.close()
+    defaultReader.close()
     countOfValidPasswords
   }
 
