@@ -27,12 +27,14 @@ class PasswordValidityChecker extends App {
     }
   }
 
-  def howManyValidPasswordsFromFile(filePath: String = DEFAULT_FILE_PATH): Int = {
+  def howManyValidPasswordsFromFile(filePath: String = DEFAULT_FILE_PATH, isForPart1: Boolean = true): Int = {
     val reader = Source.fromFile(filePath)
     val countOfValidPasswords = reader.getLines.count {
       line =>
           val (password, criteria) = parseLine(line)
-          isPasswordValidPart1(password, criteria)
+          val part1CriteriaMet = isPasswordValidPart1(password, criteria)
+          val part2CriteriaMet = isPasswordValidPart2(password, criteria)
+          isForPart1 && part1CriteriaMet || !isForPart1 && part2CriteriaMet
     }
     reader.close()
     countOfValidPasswords

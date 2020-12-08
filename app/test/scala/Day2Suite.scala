@@ -55,7 +55,7 @@ class Day2Suite extends FunSuite {
   }
 
   test("PART2: How many valid passwords are there in the given input") {
-    val countOfValidPasswordsFromDefaultFile = passwordValidityChecker.howManyValidPasswordsFromFile()
+    val countOfValidPasswordsFromDefaultFile = passwordValidityChecker.howManyValidPasswordsFromFile(isForPart1 = false)
     println(countOfValidPasswordsFromDefaultFile)
   }
 }
