@@ -2,7 +2,6 @@ package third
 
 import RichClasses.SharedValues
 import scala.annotation.tailrec
-import scala.io.BufferedSource
 
 class TobogganSlopeProblem extends SharedValues {
 

@@ -14,6 +14,8 @@ trait SharedValues {
 
   def getReader(filePath: String): BufferedSource = Source.fromFile(filePath)
 
+  def getStringFromConfig(key: String): String = CommonHelper.getStringFromConf(key)
+
   @tailrec
   final def multipleByEach(seq: List[Long], multiple: Long = 1): Long = {
     seq match {

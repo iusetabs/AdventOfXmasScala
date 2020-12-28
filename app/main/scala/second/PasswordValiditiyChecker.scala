@@ -1,7 +1,6 @@
 package second
 
 import RichClasses.SharedValues
-import scala.io.Source
 
 /** To return how many passwords are valid */
 class PasswordValidityChecker extends SharedValues {
