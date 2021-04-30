@@ -1,7 +1,6 @@
 package RichClasses
 
 import helpers.CommonHelper
-
 import scala.annotation.tailrec
 import scala.io.{BufferedSource, Source}
 
